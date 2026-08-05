@@ -1,0 +1,1 @@
+sequelise.sync({alter: true});
