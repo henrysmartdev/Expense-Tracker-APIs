@@ -77,6 +77,10 @@ Example: `GET /expenses?category=food&from=2026-01-01&to=2026-01-31&search=lunch
 | GET | `/expenses/summary` | total, per-category totals, monthly/weekly breakdown, highest category |
 | GET | `/expenses/summary?groupBy=week` | breakdown bucketed by week instead of month |
 | GET | `/expenses/summary?from=&to=` | scoped to a date range |
+| POST |	/budgets	{ category, limitAmount, period, alertThreshold } — creates or updates
+| GET |	/budgets	list all budgets for the user
+| GET |	/budgets/:category/status	current spend vs. limit, on demand
+| DELETE |	/budgets/:id	remove a budget
 
 ## Notes on design decisions
 

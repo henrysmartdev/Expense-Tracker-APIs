@@ -2,8 +2,10 @@ import expenseService from '../services/expenseService.js';
 import catchAsync from '../utils/catchAsync.js';
 
 const createExpense = catchAsync(async (req, res) => {
-  const expense = await expenseService.createExpense(req.userId, req.body);
-  res.status(201).json({ data: expense });
+  const { expense, budgetWarning } = await expenseService.createExpense(req.userId, req.body);
+  // budgetWarning is included whenever this expense pushed the category
+  // near or over its limit - the frontend can show a toast/banner if present.
+  res.status(201).json({ data: expense, budgetWarning });
 });
 
 // Handles both plain listing and filtering/search, since they're driven

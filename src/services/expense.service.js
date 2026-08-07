@@ -1,11 +1,15 @@
 import { Op, fn, col, literal } from 'sequelize';
 import { Expense } from '../models/index.js';
 import AppError from '../utils/AppError.js';
+import budgetService from './budgetService.js';
 
-// --- CRUD ---------------------------------------------------------------
 
+// Returns { expense, budgetWarning } - budgetWarning is null unless this
+// expense pushed the user near or over their limit for that category.
 const createExpense = async (userId, { amount, category, date, description }) => {
-  return Expense.create({ userId, amount, category, date, description });
+  const expense = await Expense.create({ userId, amount, category, date, description });
+  const budgetWarning = await budgetService.checkBudgetAfterExpense(userId, category);
+  return { expense, budgetWarning };
 };
 
 // Handles listing + filtering + search + pagination all in one place,

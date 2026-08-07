@@ -3,6 +3,7 @@ import cors from 'cors';
 
 import authRoutes from './routes/authRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
+import budgetRoutes from './routes/budgetRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import AppError from './utils/AppError.js';
 
@@ -16,6 +17,7 @@ app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
 
 app.use('/auth', authRoutes);
 app.use('/expenses', expenseRoutes);
+app.use('/budgets', budgetRoutes);
 
 // Catches any request to a route that doesn't exist.
 app.all('*', (req, res, next) => {
