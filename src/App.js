@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 
-import authRoutes from './routes/authRoutes.js';
-import expenseRoutes from './routes/expenseRoutes.js';
-import budgetRoutes from './routes/budgetRoutes.js';
-import errorHandler from './middleware/errorHandler.js';
+import authRoutes from './routes/auth.routes.js';
+import expenseRoutes from './routes/expense.routes.js';
+import budgetRoutes from './routes/budget.route.js';
+import errorHandler from './middlewares/erroHandler.js';
 import AppError from './utils/AppError.js';
 
 const app = express();
