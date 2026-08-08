@@ -1,6 +1,5 @@
-import budgetService from '../services/budgetService.js';
+import budgetService from '../services/budget.service.js';
 import catchAsync from '../utils/catchAsync.js';
-
 
 const setBudget = catchAsync(async (req, res) => {
   const budget = await budgetService.setBudget(req.userId, req.body);
@@ -17,10 +16,10 @@ const deleteBudget = catchAsync(async (req, res) => {
   res.status(204).send();
 });
 
-// GET /budgets/:category/status - current spend vs. limit for one category,
-// checked on demand (independent of the auto-check that runs on expense creation).
 const getBudgetStatus = catchAsync(async (req, res) => {
   const status = await budgetService.getBudgetStatus(req.userId, req.params.category);
+  // strip the raw Sequelize model instance before sending to the client
+  if (status) delete status.budget;
   res.status(200).json({ data: status });
 });
 

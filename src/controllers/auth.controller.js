@@ -1,8 +1,6 @@
-import authService from '../services/authService.js';
+import authService from '../services/auth.service.js';
 import catchAsync from '../utils/catchAsync.js';
 
-// The controller's only job is: read the request, call the service,
-// shape the response. No business logic lives here.
 const signup = catchAsync(async (req, res) => {
   const { name, email, password } = req.body;
   const { user, token } = await authService.signup({ name, email, password });

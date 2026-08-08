@@ -1,20 +1,16 @@
 import { Op, fn, col, literal } from 'sequelize';
 import { Expense } from '../models/index.js';
 import AppError from '../utils/AppError.js';
-import budgetService from './budgetService.js';
+import budgetService from './budget.service.js';
 
+// --- CRUD ---------------------------------------------------------------
 
-// Returns { expense, budgetWarning } - budgetWarning is null unless this
-// expense pushed the user near or over their limit for that category.
 const createExpense = async (userId, { amount, category, date, description }) => {
   const expense = await Expense.create({ userId, amount, category, date, description });
   const budgetWarning = await budgetService.checkBudgetAfterExpense(userId, category);
   return { expense, budgetWarning };
 };
 
-// Handles listing + filtering + search + pagination all in one place,
-// since they're really just different combinations of a WHERE clause.
-// query params: category, from, to, search, page, limit
 const getExpenses = async (userId, query) => {
   const where = { userId };
 
@@ -29,7 +25,6 @@ const getExpenses = async (userId, query) => {
   }
 
   if (query.search) {
-    // Case-insensitive partial match on the description.
     where.description = { [Op.iLike]: `%${query.search}%` };
   }
 
@@ -71,13 +66,11 @@ const updateExpense = async (userId, expenseId, updates) => {
 
 const deleteExpense = async (userId, expenseId) => {
   const expense = await getExpenseById(userId, expenseId);
-  await expense.destroy(); // soft delete - paranoid: true on the model
+  await expense.destroy();
 };
 
 // --- Summaries & reports --------------------------------------------------
 
-// Shared WHERE builder for the summary endpoints, so /summary respects
-// the same ?from=&to= range filtering as the list endpoint.
 const buildDateWhere = (userId, query) => {
   const where = { userId };
   if (query.from || query.to) {
@@ -110,13 +103,10 @@ const getSpentByCategory = async (userId, query) => {
   return rows.map((r) => ({ category: r.category, total: parseFloat(r.total) }));
 };
 
-// groupBy: 'week' | 'month' — buckets totals by time period.
 const getBreakdown = async (userId, query) => {
   const where = buildDateWhere(userId, query);
   const groupBy = query.groupBy === 'week' ? 'week' : 'month';
 
-  // date_trunc is Postgres-specific - buckets each expense's date down
-  // to the start of its week or month so we can SUM within each bucket.
   const rows = await Expense.findAll({
     where,
     attributes: [
@@ -134,11 +124,9 @@ const getBreakdown = async (userId, query) => {
 const getHighestCategory = async (userId, query) => {
   const byCategory = await getSpentByCategory(userId, query);
   if (byCategory.length === 0) return null;
-  return byCategory[0]; // already sorted DESC by total
+  return byCategory[0];
 };
 
-// One combined summary object - handy for a dashboard that wants
-// everything in a single request instead of four round trips.
 const getSummary = async (userId, query) => {
   const [total, byCategory, breakdown] = await Promise.all([
     getTotalSpent(userId, query),
@@ -154,6 +142,19 @@ const getSummary = async (userId, query) => {
   };
 };
 
+// Used by jobs/weeklysummary.js - scopes getSummary to the last 7 days
+// for a single user, for the weekly email digest.
+const getWeeklySummaryForUser = async (userId) => {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(to.getDate() - 7);
+
+  return getSummary(userId, {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10),
+  });
+};
+
 export default {
   createExpense,
   getExpenses,
@@ -165,4 +166,5 @@ export default {
   getBreakdown,
   getHighestCategory,
   getSummary,
+  getWeeklySummaryForUser,
 };

@@ -1,14 +1,12 @@
 import { Router } from 'express';
-import expenseController from '../controllers/expenseController.js';
-import requireAuth from '../middleware/auth.js';
+import expenseController from '../controllers/expense.controller.js';
+import requireAuth from '../middlewares/auth.js';
 
 const router = Router();
 
-// Every route below requires a valid JWT.
 router.use(requireAuth);
 
-// IMPORTANT: /summary must be declared before /:id, otherwise Express
-// would match "summary" as an :id param and route it to getExpense instead.
+// Must come before /:id or Express would treat "summary" as an :id param.
 router.get('/summary', expenseController.getSummary);
 
 router.route('/')

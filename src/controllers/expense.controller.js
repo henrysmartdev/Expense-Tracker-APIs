@@ -1,15 +1,11 @@
-import expenseService from '../services/expenseService.js';
+import expenseService from '../services/expense.service.js';
 import catchAsync from '../utils/catchAsync.js';
 
 const createExpense = catchAsync(async (req, res) => {
   const { expense, budgetWarning } = await expenseService.createExpense(req.userId, req.body);
-  // budgetWarning is included whenever this expense pushed the category
-  // near or over its limit - the frontend can show a toast/banner if present.
   res.status(201).json({ data: expense, budgetWarning });
 });
 
-// Handles both plain listing and filtering/search, since they're driven
-// by the same query params: ?category=&from=&to=&search=&page=&limit=
 const getExpenses = catchAsync(async (req, res) => {
   const { expenses, pagination } = await expenseService.getExpenses(req.userId, req.query);
   res.status(200).json({ data: expenses, pagination });
@@ -30,9 +26,6 @@ const deleteExpense = catchAsync(async (req, res) => {
   res.status(204).send();
 });
 
-// GET /expenses/summary?from=&to=&groupBy=month|week
-// Returns everything a dashboard would want in one call: total spent,
-// spend per category, time breakdown, and the highest category.
 const getSummary = catchAsync(async (req, res) => {
   const summary = await expenseService.getSummary(req.userId, req.query);
   res.status(200).json({ data: summary });

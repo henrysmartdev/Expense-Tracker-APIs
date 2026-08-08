@@ -1,6 +1,5 @@
-
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import sequelize from '../config/db.js';
 
 const Expense = sequelize.define(
   'Expense',
@@ -23,9 +22,6 @@ const Expense = sequelize.define(
     category: {
       type: DataTypes.STRING,
       allowNull: false,
-      // e.g. food, rent, transport - kept as a free string for now so you
-      // can add new categories without a migration. Could become an ENUM
-      // or a separate Category table later if you want more structure.
     },
     date: {
       type: DataTypes.DATEONLY,
@@ -39,7 +35,7 @@ const Expense = sequelize.define(
   {
     tableName: 'expenses',
     timestamps: true,
-    paranoid: true, 
+    paranoid: true,
     indexes: [
       { fields: ['user_id'] },
       { fields: ['category'] },

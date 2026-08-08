@@ -2,11 +2,6 @@ import jwt from 'jsonwebtoken';
 import AppError from '../utils/AppError.js';
 import catchAsync from '../utils/catchAsync.js';
 
-// Protects any route it's attached to. Expects the client to send:
-//   Authorization: Bearer <token>
-// If the token is valid, we attach req.userId so controllers know who's
-// making the request. If not, we reject before the request reaches
-// the controller at all.
 const requireAuth = catchAsync(async (req, res, next) => {
   const authHeader = req.headers.authorization;
 

@@ -1,7 +1,6 @@
-
 import { DataTypes } from 'sequelize';
-import bcrypt from 'bcrypt';
-import sequelize from '../config/database.js';
+import bcrypt from 'bcryptjs';
+import sequelize from '../config/db.js';
 
 const User = sequelize.define(
   'User',
@@ -28,10 +27,8 @@ const User = sequelize.define(
   },
   {
     tableName: 'users',
-    timestamps: true, // adds createdAt / updatedAt automatically
+    timestamps: true,
     hooks: {
-      // Before saving a user, hash their plaintext password.
-      // This runs on both create() and any update that changes `password`.
       beforeSave: async (user) => {
         if (user.changed('password')) {
           user.password = await bcrypt.hash(user.password, 10);
@@ -41,14 +38,10 @@ const User = sequelize.define(
   }
 );
 
-// Instance method: compare a plaintext password against the stored hash.
-// Used during login.
 User.prototype.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Strip the password out whenever a User instance is converted to JSON,
-// so we never accidentally send a password hash back to the client.
 User.prototype.toJSON = function () {
   const values = { ...this.get() };
   delete values.password;
